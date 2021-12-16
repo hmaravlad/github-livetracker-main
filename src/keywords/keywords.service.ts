@@ -3,26 +3,29 @@ import { AddWordDto } from './dto/add-word.dto';
 import { LanguageFrequenciesUpdatedDto } from './dto/lang-frequencies-updated.dto';
 import { NewProjectsUpdatedDto } from './dto/new-projects-updated.dto';
 import { TopProjectsUpdatedDto } from './dto/top-projects-updated.dto';
+import { KeywordsQueries } from './keywords.queries';
 
 @Injectable()
 export class KeywordsService {
-  add(createWordDto: AddWordDto) {
+  constructor(private readonly keywordsQueries: KeywordsQueries) {}
+
+  async add(createWordDto: AddWordDto) {
     console.log('not implemented');
   }
 
-  subscribe() {
+  async subscribe() {
     console.log('not implemented');
   }
 
-  newProjectsUpdated(newProjectsUpdatedDto: NewProjectsUpdatedDto) {
+  async newProjectsUpdated(newProjectsUpdatedDto: NewProjectsUpdatedDto) {
     console.log('not implemented');
   }
 
-  topProjectsUpdated(topProjectsUpdatedDto: TopProjectsUpdatedDto) {
+  async topProjectsUpdated(topProjectsUpdatedDto: TopProjectsUpdatedDto) {
     console.log('not implemented');
   }
 
-  languageFrequenciesUpdated(
+  async languageFrequenciesUpdated(
     languageFrequenciesUpdatedDto: LanguageFrequenciesUpdatedDto,
   ) {
     console.log('not implemented');
