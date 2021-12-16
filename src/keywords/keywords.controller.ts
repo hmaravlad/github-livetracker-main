@@ -1,36 +1,49 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, Headers } from '@nestjs/common';
 import { KeywordsService } from './keywords.service';
 import { AddWordDto } from './dto/add-word.dto';
 import { NewProjectsUpdatedDto } from './dto/new-projects-updated.dto';
 import { TopProjectsUpdatedDto } from './dto/top-projects-updated.dto';
 import { LanguageFrequenciesUpdatedDto } from './dto/lang-frequencies-updated.dto';
+import { AuthService } from './auth.service';
 
 @Controller('keywords')
 export class KeywordsController {
-  constructor(private readonly keywordsService: KeywordsService) {}
+  constructor(
+    private readonly keywordsService: KeywordsService,
+    private readonly authService: AuthService,
+  ) {}
 
   @Post()
-  add(@Body() createWordDto: AddWordDto) {
+  async add(
+    @Headers('authorization') token,
+    @Body() createWordDto: AddWordDto,
+  ) {
+    const user = await this.authService.check(token);
+    console.dir({ user });
     return this.keywordsService.add(createWordDto);
   }
 
   @Get('subscribe')
-  subscribe() {
+  async subscribe() {
     return this.keywordsService.subscribe();
   }
 
   @Post('new-projects')
-  newProjectsUpdated(@Body() newProjectsUpdatedDto: NewProjectsUpdatedDto) {
+  async newProjectsUpdated(
+    @Body() newProjectsUpdatedDto: NewProjectsUpdatedDto,
+  ) {
     return this.keywordsService.newProjectsUpdated(newProjectsUpdatedDto);
   }
 
   @Post('top-projects')
-  topProjectsUpdated(@Body() topProjectsUpdatedDto: TopProjectsUpdatedDto) {
+  async topProjectsUpdated(
+    @Body() topProjectsUpdatedDto: TopProjectsUpdatedDto,
+  ) {
     return this.keywordsService.topProjectsUpdated(topProjectsUpdatedDto);
   }
 
   @Post('language-frequencies')
-  languageFrequenciesUpdated(
+  async languageFrequenciesUpdated(
     @Body() languageFrequenciesUpdatedDto: LanguageFrequenciesUpdatedDto,
   ) {
     return this.keywordsService.languageFrequenciesUpdated(

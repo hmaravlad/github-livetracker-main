@@ -1,6 +1,7 @@
 import { ConfigService } from '@nestjs/config';
 
 export interface ConfigData {
+  authServiceUrl: string;
   db: {
     host: string;
     port: string;
@@ -17,6 +18,7 @@ export interface Config {
 export function parseConfig(): Config {
   return {
     data: {
+      authServiceUrl: process.env.AUTH_SERVICE_URL || '127.0.0.1',
       db: {
         host: process.env.DB_HOST || '127.0.0.1',
         port: process.env.DB_PORT || '5432',
