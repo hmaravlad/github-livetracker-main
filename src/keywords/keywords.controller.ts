@@ -19,8 +19,7 @@ export class KeywordsController {
     @Body() createWordDto: AddWordDto,
   ) {
     const user = await this.authService.check(token);
-    console.dir({ user });
-    return this.keywordsService.add(createWordDto);
+    return this.keywordsService.add(createWordDto, user);
   }
 
   @Get('subscribe')
