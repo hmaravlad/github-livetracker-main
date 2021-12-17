@@ -50,4 +50,19 @@ export class KeywordsQueries {
       });
     });
   }
+
+  async getKeywordIdsByUser(userId: number): Promise<number[]> {
+    const keywordIds = await this.knex('user_keyword')
+      .select('keyword_id as keywordId')
+      .where('user_id', '=', userId);
+    return keywordIds.map((val) => val.keywordId);
+  }
+
+  async getKeywordsByUser(userId: number): Promise<Keyword[]> {
+    const keywordIds = await this.getKeywordIdsByUser(userId);
+    const keywords = await this.knex('keywords')
+      .select('id', 'keyword', 'created_at as createdAt')
+      .whereIn('id', keywordIds);
+    return keywords;
+  }
 }

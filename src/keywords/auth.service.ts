@@ -12,7 +12,11 @@ export class AuthService {
     this.authServiceUrl = getConfig(this.configService).authServiceUrl;
   }
 
-  async check(token: string): Promise<User> {
+  async check(token: string | undefined): Promise<User> {
+    if (token === undefined) {
+      throw new UnauthorizedException();
+    }
+
     const { statusCode, body } = await request(
       `${this.authServiceUrl}/is-auth`,
       {

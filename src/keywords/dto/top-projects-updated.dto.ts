@@ -1,10 +1,13 @@
-import { IsString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsArray, IsNumber, ValidateNested } from 'class-validator';
 import { Project } from '../entities/project.entity';
 
 export class TopProjectsUpdatedDto {
-  @IsString()
-  keyword: string;
+  @IsNumber()
+  keywordId: number;
 
+  @IsArray()
   @ValidateNested({ each: true })
+  @Type(() => Project)
   data: Project[];
 }

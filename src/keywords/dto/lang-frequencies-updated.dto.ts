@@ -1,9 +1,9 @@
-import { IsString, ValidateNested } from 'class-validator';
+import { IsNumber, ValidateNested } from 'class-validator';
 import { LanguageFrequency } from '../entities/lang-frequency.entity';
 
 export class LanguageFrequenciesUpdatedDto {
-  @IsString()
-  keyword: string;
+  @IsNumber()
+  keywordId: number;
 
   @ValidateNested({ each: true })
   data: LanguageFrequency[];

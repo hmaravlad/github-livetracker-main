@@ -1,10 +1,20 @@
-import { Controller, Get, Post, Body, Headers } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Headers,
+  Sse,
+  MessageEvent,
+  Param,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { KeywordsService } from './keywords.service';
 import { AddWordDto } from './dto/add-word.dto';
 import { NewProjectsUpdatedDto } from './dto/new-projects-updated.dto';
 import { TopProjectsUpdatedDto } from './dto/top-projects-updated.dto';
 import { LanguageFrequenciesUpdatedDto } from './dto/lang-frequencies-updated.dto';
 import { AuthService } from './auth.service';
+import { from, interval, map, mergeMap, Observable } from 'rxjs';
 
 @Controller('keywords')
 export class KeywordsController {
@@ -22,9 +32,24 @@ export class KeywordsController {
     return this.keywordsService.add(createWordDto, user);
   }
 
-  @Get('subscribe')
-  async subscribe() {
-    return this.keywordsService.subscribe();
+  @Sse('subscribe/:authorization')
+  subscribe(@Param('authorization') token): Observable<MessageEvent> {
+    return from(this.subscribeAsync(token)).pipe(mergeMap((x) => x));
+  }
+
+  async subscribeAsync(
+    @Param('authorization') token,
+  ): Promise<Observable<MessageEvent>> {
+    try {
+      const user = await this.authService.check(token);
+      return await this.keywordsService.subscribe(user);
+    } catch (error) {
+      return from([
+        {
+          data: 'error',
+        },
+      ]);
+    }
   }
 
   @Post('new-projects')
