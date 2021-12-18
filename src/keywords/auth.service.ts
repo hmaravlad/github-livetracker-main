@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { request } from 'undici';
 import { ConfigService } from '@nestjs/config';
-import { getConfig } from 'src/config';
+import { getConfig } from '../config';
 
 @Injectable()
 export class AuthService {
