@@ -4,6 +4,7 @@ import { AddWordDto } from './dto/add-word.dto';
 import { LanguageFrequenciesUpdatedDto } from './dto/lang-frequencies-updated.dto';
 import { NewProjectsUpdatedDto } from './dto/new-projects-updated.dto';
 import { TopProjectsUpdatedDto } from './dto/top-projects-updated.dto';
+import { Keyword } from './entities/keyword.entity';
 import { User } from './entities/user.entity';
 import { KeywordEventProcessor } from './keyword.event-processor';
 import { KeywordsQueries } from './keywords.queries';
@@ -17,7 +18,7 @@ export class KeywordsService {
     KeywordEventProcessor
   >();
 
-  async add(createWordDto: AddWordDto, user: User) {
+  async add(createWordDto: AddWordDto, user: User): Promise<Keyword> {
     const keyword = await this.keywordsQueries.getKeyword(
       createWordDto.keyword,
     );
@@ -31,8 +32,12 @@ export class KeywordsService {
       throw new HttpException('This id keyword already added', 400);
     } else if (keyword) {
       await this.keywordsQueries.connectKeywordToUser(keyword.id, user.id);
+      return keyword;
     } else {
-      await this.keywordsQueries.addKeyword(createWordDto.keyword, user.id);
+      return await this.keywordsQueries.addKeyword(
+        createWordDto.keyword,
+        user.id,
+      );
     }
   }
 
@@ -59,7 +64,8 @@ export class KeywordsService {
     const eventProcessor = this.keywordEventProcessors.get(
       newProjectsUpdatedDto.keywordId,
     );
-    if (!eventProcessor) return;
+    if (!eventProcessor)
+      throw new HttpException('No one is subscribed on this keyword', 400);
     eventProcessor.emitNewProjectsUpdated(newProjectsUpdatedDto.data);
   }
 
@@ -67,7 +73,8 @@ export class KeywordsService {
     const eventProcessor = this.keywordEventProcessors.get(
       topProjectsUpdatedDto.keywordId,
     );
-    if (!eventProcessor) return;
+    if (!eventProcessor)
+      throw new HttpException('No one is subscribed on this keyword', 400);
     eventProcessor.emitTopProjectsUpdated(topProjectsUpdatedDto.data);
   }
 
@@ -77,7 +84,8 @@ export class KeywordsService {
     const eventProcessor = this.keywordEventProcessors.get(
       languageFrequenciesUpdatedDto.keywordId,
     );
-    if (!eventProcessor) return;
+    if (!eventProcessor)
+      throw new HttpException('No one is subscribed on this keyword', 400);
     eventProcessor.emitLanguageFrequenciesUpdated(
       languageFrequenciesUpdatedDto.data,
     );
