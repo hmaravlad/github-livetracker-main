@@ -6,7 +6,6 @@ import {
   Sse,
   MessageEvent,
   Param,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { KeywordsService } from './keywords.service';
 import { AddWordDto } from './dto/add-word.dto';
@@ -14,7 +13,8 @@ import { NewProjectsUpdatedDto } from './dto/new-projects-updated.dto';
 import { TopProjectsUpdatedDto } from './dto/top-projects-updated.dto';
 import { LanguageFrequenciesUpdatedDto } from './dto/lang-frequencies-updated.dto';
 import { AuthService } from './auth.service';
-import { from, interval, map, mergeMap, Observable } from 'rxjs';
+import { from, mergeMap, Observable } from 'rxjs';
+import { Keyword } from './entities/keyword.entity';
 
 @Controller('keywords')
 export class KeywordsController {
@@ -27,7 +27,7 @@ export class KeywordsController {
   async add(
     @Headers('authorization') token,
     @Body() createWordDto: AddWordDto,
-  ) {
+  ): Promise<Keyword> {
     const user = await this.authService.check(token);
     return this.keywordsService.add(createWordDto, user);
   }

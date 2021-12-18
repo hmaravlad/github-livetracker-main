@@ -32,23 +32,26 @@ export class KeywordsQueries {
     });
   }
 
-  async addKeyword(keyword: string, userId: number): Promise<void> {
-    await this.knex.transaction(async (trx) => {
-      const keywordId = parseInt(
-        (
-          await trx('keywords')
-            .insert({
-              keyword,
-              created_at: new Date(),
-            })
-            .returning('id')
-        )[0],
-      );
-      await trx('user_keyword').insert({
-        user_id: userId,
-        keyword_id: keywordId,
-      });
+  async addKeyword(word: string, userId: number): Promise<Keyword> {
+    const newKeyword = await this.knex.transaction(async (trx) => {
+      const keyword = (
+        await trx('keywords')
+          .insert({
+            keyword: word,
+            created_at: new Date(),
+          })
+          .returning('*')
+      )[0];
+      await trx('user_keyword')
+        .insert({
+          user_id: userId,
+          keyword_id: parseInt(keyword.id),
+        })
+        .returning('*');
+      return keyword;
     });
+    console.dir({ newKeyword });
+    return newKeyword as Keyword;
   }
 
   async getKeywordIdsByUser(userId: number): Promise<number[]> {
