@@ -18,6 +18,8 @@ export class KeywordsService {
     KeywordEventProcessor
   >();
 
+  private readonly subscribedUsers: User[] = [];
+
   async add(createWordDto: AddWordDto, user: User): Promise<Keyword> {
     const keyword = await this.keywordsQueries.getKeyword(
       createWordDto.keyword,
@@ -49,14 +51,27 @@ export class KeywordsService {
       if (this.keywordEventProcessors.has(keyword.id)) {
         eventProcessors.push(this.keywordEventProcessors.get(keyword.id));
       } else {
-        //should notify worker supervisor here
         const eventProcessor = new KeywordEventProcessor(keyword.keyword);
         this.keywordEventProcessors.set(keyword.id, eventProcessor);
         eventProcessors.push(eventProcessor);
       }
     }
+
+    this.subscribedUsers.push(user);
+    await this.keywordsQueries.insertKeywordToObservedKeywordsByUser(user.id);
+
     return from(eventProcessors.map((proc) => proc.userDataObservable)).pipe(
       mergeMap((x) => x),
+    );
+  }
+
+  async unsubscribe(user: User) {
+    const index = this.subscribedUsers.findIndex((u) => u.id === user.id);
+    this.subscribedUsers.splice(index, 1);
+    const userIds = this.subscribedUsers.map((u) => u.id);
+    await this.keywordsQueries.removeKeywordFromObservedKeywordsByUser(
+      user.id,
+      userIds,
     );
   }
 

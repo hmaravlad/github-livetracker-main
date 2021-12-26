@@ -37,9 +37,7 @@ export class KeywordsController {
     return from(this.subscribeAsync(token)).pipe(mergeMap((x) => x));
   }
 
-  async subscribeAsync(
-    @Param('authorization') token,
-  ): Promise<Observable<MessageEvent>> {
+  async subscribeAsync(token: string): Promise<Observable<MessageEvent>> {
     try {
       const user = await this.authService.check(token);
       return await this.keywordsService.subscribe(user);
@@ -50,6 +48,12 @@ export class KeywordsController {
         },
       ]);
     }
+  }
+
+  @Post('unsubscribe')
+  async unsubscribe(@Headers('authorization') token) {
+    const user = await this.authService.check(token);
+    return this.keywordsService.unsubscribe(user);
   }
 
   @Post('new-projects')

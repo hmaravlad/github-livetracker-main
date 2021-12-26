@@ -51,4 +51,15 @@ export class KeywordsQueriesMock {
     const keywords = this.keywords.filter((k) => keywordIds.includes(k.id));
     return keywords;
   }
+
+  async insertKeywordToObservedKeywordsByUser(userId: number): Promise<void> {
+    return;
+  }
+
+  async removeKeywordFromObservedKeywordsByUser(
+    userId: number,
+    subscribedUsers: number[],
+  ): Promise<void> {
+    return;
+  }
 }

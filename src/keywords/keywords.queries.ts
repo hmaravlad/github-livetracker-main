@@ -50,7 +50,6 @@ export class KeywordsQueries {
         .returning('*');
       return keyword;
     });
-    console.dir({ newKeyword });
     return newKeyword as Keyword;
   }
 
@@ -67,5 +66,39 @@ export class KeywordsQueries {
       .select('id', 'keyword', 'created_at as createdAt')
       .whereIn('id', keywordIds);
     return keywords;
+  }
+
+  async insertKeywordToObservedKeywordsByUser(userId: number): Promise<void> {
+    let keywordIds = await this.getKeywordIdsByUser(userId);
+    const addedIds = (
+      await this.knex('observed_keywords').select('keyword_id')
+    ).map((x) => x.keyword_id);
+    keywordIds = keywordIds.filter((id) => !addedIds.includes(id));
+    for (const id of keywordIds) {
+      await this.knex('observed_keywords').insert({
+        keyword_id: id,
+        added_at: new Date(),
+      });
+    }
+  }
+
+  async removeKeywordFromObservedKeywordsByUser(
+    userId: number,
+    subscribedUsers: number[],
+  ): Promise<void> {
+    subscribedUsers = subscribedUsers.filter((id) => id != userId);
+    let keywordIds = await this.getKeywordIdsByUser(userId);
+    const stillObservedKeywordIds = (
+      await this.knex('user_keyword')
+        .select('keyword_id as id')
+        .distinct()
+        .whereIn('user_id', subscribedUsers)
+    ).map((x) => x.id);
+    keywordIds = keywordIds.filter(
+      (id) => !stillObservedKeywordIds.includes(id),
+    );
+    await this.knex('observed_keywords')
+      .delete()
+      .whereIn('keyword_id', keywordIds);
   }
 }
