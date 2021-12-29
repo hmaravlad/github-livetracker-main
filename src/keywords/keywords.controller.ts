@@ -13,7 +13,7 @@ import { NewProjectsUpdatedDto } from './dto/new-projects-updated.dto';
 import { TopProjectsUpdatedDto } from './dto/top-projects-updated.dto';
 import { LanguageFrequenciesUpdatedDto } from './dto/lang-frequencies-updated.dto';
 import { AuthService } from './auth.service';
-import { from, mergeMap, Observable } from 'rxjs';
+import { from, interval, map, merge, mergeMap, Observable } from 'rxjs';
 import { Keyword } from './entities/keyword.entity';
 
 @Controller('keywords')
@@ -34,7 +34,19 @@ export class KeywordsController {
 
   @Sse('subscribe/:authorization')
   subscribe(@Param('authorization') token): Observable<MessageEvent> {
-    return from(this.subscribeAsync(token)).pipe(mergeMap((x) => x));
+    const a = from(this.subscribeAsync(token)).pipe(mergeMap((x) => x));
+    const b = interval(5000).pipe(
+      map((x) => {
+        return {
+          data: {
+            message: 'ping',
+          },
+        };
+      }),
+    );
+
+    return merge(a, b);
+    // return a;
   }
 
   async subscribeAsync(token: string): Promise<Observable<MessageEvent>> {
